@@ -22,7 +22,7 @@ const sendTx = async (abi, contractAddress, account, privateKey, rpc, commonOpti
     const tx = new Tx({
         nonce: web3.utils.toHex(txCount),
         to: contractAddress,
-        gasLimit: web3.utils.toHex(2100000),
+        gasLimit: web3.utils.toHex(21000000),
         gasPrice: web3.utils.toHex(90 * 1e9),
         value: 200,
         data: data,
@@ -42,7 +42,8 @@ const sendTx = async (abi, contractAddress, account, privateKey, rpc, commonOpti
             hash,
             err
         })
-    })
+    }).then((res) => console.log(res))
+    .catch((err) => console.log("ERR",err))
 
     txCount++;
 }
