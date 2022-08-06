@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("@nomiclabs/hardhat-etherscan");
 require("dotenv").config();
 
 // Go to https://www.alchemyapi.io, sign up, create
@@ -18,5 +19,10 @@ module.exports = {
       url: `https://eth-goerli.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
       accounts: [GOERLI_PRIVATE_KEY]
     }
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: "YCG895DJCD2XRCXGTPCUQBYZKWFCI5GA2V"
   }
 };
