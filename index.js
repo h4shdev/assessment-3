@@ -6,25 +6,27 @@ require('dotenv').config()
 
 const sendTx = async (abi, contractAddress, account, privateKey, rpc, commonOptions) => {
     const web3 = new Web3(rpc);
-    const contract = new web3.eth.Contract(abi,contractAddress)
+    const contract = new web3.eth.Contract(abi, contractAddress)
     const id = 1;
 
     // READ CONTRACT
-    const candidates = await contract.methods.candidates(id).call();
-    const candidatesCount = await contract.methods.candidatesCount().call();
-    const isVoter = await contract.methods.voters(account).call();
+    const endTimer = await contract.methods.auctionEndTime().call();
+    const beneficiary = await contract.methods.beneficiary().call();
+    const highestBidder = await contract.methods.highestBidder().call();
+    const highestBid = await contract.methods.highestbid().call();
 
     // WRITE CONTRACT 
     let txCount = web3.eth.getTransactionCount(account);
-    const data =  contract.methods.vote(id).encodeABI();
+    const data = contract.methods.bid().encodeABI();
+    const data2 = contract.methods.withdraw().encodeABI();
     const tx = new Tx({
-        nonce:web3.utils.toHex(txCount),
-        to:contractAddress,
-        gasLimit:web3.utils.toHex(210000),
-        gasPrice: web3.utils.toHex(67 * 1e9), 
-        value:0,
-        data:data,
-    },commonOptions);
+        nonce: web3.utils.toHex(txCount),
+        to: contractAddress,
+        gasLimit: web3.utils.toHex(2100000),
+        gasPrice: web3.utils.toHex(90 * 1e9),
+        value: 200,
+        data: data,
+    }, commonOptions);
 
     tx.sign(privateKey)
 
@@ -32,7 +34,14 @@ const sendTx = async (abi, contractAddress, account, privateKey, rpc, commonOpti
     const raw = "0x" + serializedTx.toString('hex')
 
     web3.eth.sendSignedTransaction(raw, (err, hash) => {
-        console.log({candidates, candidatesCount, isVoter, hash})
+        console.log({
+            endTimer,
+            beneficiary,
+            highestBidder,
+            highestBid,
+            hash,
+            err
+        })
     })
 
     txCount++;
@@ -62,8 +71,8 @@ const ETHEREUM_CONTRACT = "0xaD38761b9b9774dc84fEdd2393F8cd53f7A3ee07"
 const ETHEREUM_ABI = AuctionABI
 const ETHEREUM_ACC = "0x86E088E3b920b4dcec9f4F53c307e3D3C1A3838A"
 const ETHEREUM_RPC = 'https://goerli.infura.io/v3/d7311bc57b2f4db49bda8fa6b4d7a862'
-const ETHEREUM_KEY = Buffer.from(process.env.GOERLI_KEY,'hex');
-const ETHEREUM_COMMON = {chain: 'goerli'}
+const ETHEREUM_KEY = Buffer.from(process.env.GOERLI_KEY, 'hex');
+const ETHEREUM_COMMON = { chain: 'goerli' }
 
 // console.log(ETHEREUM_ABI)
 sendTx(ETHEREUM_ABI, ETHEREUM_CONTRACT, ETHEREUM_ACC, ETHEREUM_KEY, ETHEREUM_RPC, ETHEREUM_COMMON)
