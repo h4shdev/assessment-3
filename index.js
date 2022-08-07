@@ -4,6 +4,29 @@ const Web3 = require('web3');
 const Common = require('ethereumjs-common').default;
 require('dotenv').config()
 
+const getEvents = async (transactionContract) => {
+    console.log(transactionContract.events)
+    // const transactionContract = contract;
+    // try {
+    //     await transactionContract.getPastEvents('highestBidIncreased',{ fromBlock: 0  },(err,event) => console.log(event));
+    //     await transactionContract.getPastEvents('auctionEnded',{ fromBlock: 0 },(err,event) => console.log(event));
+        // await transactionContract.getPastEvents('auctionCreated',{},(err,event) => console.log(event));
+        // await transactionContract.getPastEvents('bidCreated',{},(err,event) => console.log(event));
+        // await transactionContract.getPastEvents('withdrawReq',{},(err,event) => console.log(event));
+    // } catch(err) {
+    //     console.log(err);
+    // }
+    const filter6 = await transactionContract.events.allEvents();
+    //('Transfer', options, (err:any, events:any) => console.log(err, events))
+    // contract.estimateGas.contractFn(args...);
+    // console.log(transactionContract)
+    // transactionContract.queryFilter('Transfer', block1, block2);
+    // transactionContract.queryFilter(, block1, block2);
+
+    return [filter6]
+}
+
+
 const sendTx = async (abi, contractAddress, account, privateKey, rpc, commonOptions) => {
     const web3 = new Web3(rpc);
     const contract = new web3.eth.Contract(abi, contractAddress)
@@ -16,36 +39,43 @@ const sendTx = async (abi, contractAddress, account, privateKey, rpc, commonOpti
     const highestBid = await contract.methods.highestbid().call();
 
     // WRITE CONTRACT 
-    let txCount = web3.eth.getTransactionCount(account);
-    const data = contract.methods.bid().encodeABI();
-    const data2 = contract.methods.withdraw().encodeABI();
-    const tx = new Tx({
-        nonce: web3.utils.toHex(txCount),
-        to: contractAddress,
-        gasLimit: web3.utils.toHex(21000000),
-        gasPrice: web3.utils.toHex(90 * 1e9),
-        value: 200,
-        data: data,
-    }, commonOptions);
+    try {
+        let txCount = web3.eth.getTransactionCount(account) ;
+        const data = contract.methods.bid().encodeABI();
+        const data2 = contract.methods.withdraw().encodeABI();
+        const tx = new Tx({
+            nonce: web3.utils.toHex(txCount),
+            to: contractAddress,
+            gasLimit: web3.utils.toHex(2100000),
+            gasPrice: web3.utils.toHex(80 * 1e9),
+            value: 0.001,
+            data: data,
+        }, commonOptions);
+    
+        tx.sign(privateKey)
+    
+        const serializedTx = tx.serialize();
+        const raw = "0x" + serializedTx.toString('hex')
+    
+        await web3.eth.sendSignedTransaction(raw, (err, hash) => {
+            console.log({
+                endTimer,
+                beneficiary,
+                highestBidder,
+                highestBid,
+                hash,
+                err
+            })
+        })    
+        txCount++;
+    
+    } catch(err) {
+        console.log(err);
+    }
+    
+    // EVENTS
+    await getEvents(contract);
 
-    tx.sign(privateKey)
-
-    const serializedTx = tx.serialize();
-    const raw = "0x" + serializedTx.toString('hex')
-
-    web3.eth.sendSignedTransaction(raw, (err, hash) => {
-        console.log({
-            endTimer,
-            beneficiary,
-            highestBidder,
-            highestBid,
-            hash,
-            err
-        })
-    }).then((res) => console.log(res))
-    .catch((err) => console.log("ERR",err))
-
-    txCount++;
 }
 
 // const BINANCE_CONTRACT = "0x69c151d021Fca2a2319C73aDFF4381B9902c7945";
