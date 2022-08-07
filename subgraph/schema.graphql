@@ -1,0 +1,7 @@
+type AuctionEntity @entity {
+  id: ID!
+  highestBid: BigInt!
+  auctionEnded: Boolean!
+  beneficiary: Bytes! #address
+  highestBidder: Bytes!
+}

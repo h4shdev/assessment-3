@@ -1,0 +1,27 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Auction
+    network: goerli
+    source:
+      address: "0xaD38761b9b9774dc84fEdd2393F8cd53f7A3ee07"
+      abi: Auction
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Auction
+      abis:
+        - name: Auction
+          file: ./abis/Auction.json
+      eventHandlers:
+        - event: auctionCreated(address)
+          handler: handleauctionCreated
+        - event: auctionEnded(indexed address,uint256)
+          handler: handleauctionEnded
+        - event: highestBidIncreased(address,indexed uint256)
+          handler: handlehighestBidIncreased
+      file: ./src/auction.ts
